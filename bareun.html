@@ -301,19 +301,55 @@
 <div class="toast" id="toast"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script>
 (function(){
 "use strict";
 
 /* =========================================================
-   저장소 — 지금은 이 기기(localStorage)에 저장(테스트용)
-   ※ Firebase 연동 시 이 4개 함수만 Firestore 호출로 교체하면 됨
+   저장소 — Firebase(Firestore) 클라우드 저장 (어느 기기서나 같은 자료, 실시간 동기화)
    ========================================================= */
-var K={acc:'gm_accounts', rec:'gm_records', sess:'gm_session'};
-function getRecords(){try{return JSON.parse(localStorage.getItem(K.rec)||'[]');}catch(e){return[];}}
-function setRecords(r){localStorage.setItem(K.rec,JSON.stringify(r));}
-function getAccounts(){try{return JSON.parse(localStorage.getItem(K.acc)||'[]');}catch(e){return[];}}
-function setAccounts(a){localStorage.setItem(K.acc,JSON.stringify(a));}
+var firebaseConfig={
+  apiKey:"AIzaSyDeLl1AhBKjemTnjxWIf_c_1gDo32zTzsk",
+  authDomain:"bareun-92f0e.firebaseapp.com",
+  projectId:"bareun-92f0e",
+  storageBucket:"bareun-92f0e.firebasestorage.app",
+  messagingSenderId:"10250765363",
+  appId:"1:10250765363:web:962bf1b5aa3db03fc5cf46"
+};
+firebase.initializeApp(firebaseConfig);
+var db=firebase.firestore();
+var K={sess:'gm_session'};
+var RECORDS=[],ACCOUNTS=[];
+function getRecords(){return RECORDS;}
+function getAccounts(){return ACCOUNTS;}
+function fbErr(e){console.error(e);toast('연결 오류 — 인터넷을 확인하세요');}
+function addRecord(o){db.collection('records').add(o).catch(fbErr);}
+function updateRecord(id,o){db.collection('records').doc(id).update(o).catch(fbErr);}
+function deleteRecord(id){db.collection('records').doc(id).delete().catch(fbErr);}
+function addEmployee(name,pw){db.collection('employees').doc(name).set({pw:pw}).catch(fbErr);}
+function deleteEmployee(name){db.collection('employees').doc(name).delete().catch(fbErr);}
+function seedEmployees(){
+  ['박상언','이혜진','강승환','신영재','이강용','김동엽','김미화','총무'].forEach(function(n){
+    db.collection('employees').doc(n).set({pw:hashPw('0000')});
+  });
+}
+function renderCurrent(){
+  if($('checkView').classList.contains('sel'))renderCheck();
+  else if($('adminView').classList.contains('sel')){renderSummary();renderEmployees();}
+}
+function startSync(){
+  db.collection('employees').onSnapshot(function(snap){
+    ACCOUNTS=snap.docs.map(function(d){return {id:d.id,pw:(d.data()||{}).pw};});
+    if(snap.empty)seedEmployees();
+    if($('adminView').classList.contains('sel'))renderEmployees();
+  },fbErr);
+  db.collection('records').onSnapshot(function(snap){
+    RECORDS=snap.docs.map(function(d){var x=d.data()||{};x.id=d.id;return x;});
+    renderCurrent();
+  },fbErr);
+}
 /* ========================================================= */
 
 /* ---------- 급여 규칙 (코드 안에만 / 패드엔 안 보임 / 엑셀에서만 계산) ---------- */
@@ -357,18 +393,7 @@ function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&am
 var $=function(id){return document.getElementById(id);};
 var tt;function toast(m){var t=$('toast');t.textContent=m;t.classList.add('show');clearTimeout(tt);tt=setTimeout(function(){t.classList.remove('show');},1700);}
 
-/* ---------- 직원 명단만 자동 준비 (샘플 근무기록 없음 / 깨끗한 시작) ----------
-   SEEDVER를 올리면 이미 열어본 브라우저도 다음에 열 때 갱신됨 */
-function seed(){
-  var SEEDVER='3';
-  var bump=(localStorage.getItem('gm_seedver')!==SEEDVER);
-  if(bump || !localStorage.getItem(K.acc)){
-    var names=['박상언','이혜진','강승환','신영재','이강용','김동엽','김미화','총무'];
-    setAccounts(names.map(function(n){return {id:n,pw:hashPw('0000')};}));
-  }
-  if(bump){ setRecords([]); }   /* 이전에 깔린 샘플 근무기록 제거(깨끗하게) */
-  localStorage.setItem('gm_seedver',SEEDVER);
-}
+/* ---------- (직원 명단 자동 준비는 Firestore의 seedEmployees에서 처리) ---------- */
 
 /* ---------- 화면 전환 ---------- */
 function showLogin(){$('login').classList.remove('hidden');$('app').classList.add('hidden');}
@@ -389,6 +414,7 @@ function switchTab(w){
 function doLogin(){
   var id=$('loginId').value.trim(),pw=$('loginPw').value;
   if(!id||!pw){toast('이름과 비밀번호를 입력하세요');return;}
+  if(!ACCOUNTS.length){toast('연결 중이에요. 잠시 후 다시 눌러주세요');return;}
   var a=getAccounts().filter(function(x){return x.id===id&&x.pw===hashPw(pw);})[0];
   if(a){localStorage.setItem(K.sess,id);$('loginPw').value='';showApp();}
   else toast('이름 또는 비밀번호가 맞지 않습니다');
@@ -417,9 +443,8 @@ function askConfirm(){
   $('confirmModal').classList.add('show');
 }
 function confirmSave(){
-  var recs=getRecords();
-  recs.push({id:Date.now()+'_'+Math.floor(Math.random()*1000),date:todayISO(),name:$('fName').value.trim(),rrn:fmtRrn($('fRrn').value),type:curType,hours:stdHours(curType),memo:''});
-  setRecords(recs);$('confirmModal').classList.remove('show');resetInput();toast('등록되었습니다!');$('fName').focus();
+  addRecord({date:todayISO(),name:$('fName').value.trim(),rrn:fmtRrn($('fRrn').value),type:curType,hours:stdHours(curType),memo:''});
+  $('confirmModal').classList.remove('show');resetInput();toast('등록되었습니다!');$('fName').focus();
 }
 
 /* ---------- 확인(검색) ---------- */
@@ -476,13 +501,12 @@ function saveEdit(){
   if(!name){toast('이름을 써주세요');return;}
   if(digits(rrn).length!==13){toast('주민번호 13자리를 확인하세요');return;}
   if(edHours!==stdHours(edType) && !memo){$('eMemoErr').classList.add('show');return;}
-  var recs=getRecords();
-  recs.forEach(function(r){if(r.id===edId){r.name=name;r.rrn=rrn;r.date=$('eDate').value;r.type=edType;r.hours=edHours;r.memo=memo;}});
-  setRecords(recs);$('editModal').classList.remove('show');renderCheck();toast('수정되었습니다');
+  updateRecord(edId,{name:name,rrn:rrn,date:$('eDate').value,type:edType,hours:edHours,memo:memo});
+  $('editModal').classList.remove('show');toast('수정되었습니다');
 }
 function deleteRec(){
   if(!confirm('이 근무 기록을 삭제할까요? 되돌릴 수 없어요.'))return;
-  setRecords(getRecords().filter(function(r){return r.id!==edId;}));$('editModal').classList.remove('show');renderCheck();toast('삭제되었습니다');
+  deleteRecord(edId);$('editModal').classList.remove('show');toast('삭제되었습니다');
 }
 
 /* ---------- 관리: 요약·직원 ---------- */
@@ -516,14 +540,13 @@ function renderEmployees(){
 function addEmp(){
   var n=$('newName').value.trim(),p=$('newPw').value.trim();
   if(!n||!p){toast('이름과 비밀번호를 입력하세요');return;}
-  var list=getAccounts();
-  if(list.some(function(a){return a.id===n;})){toast('이미 있는 직원이에요');return;}
-  list.push({id:n,pw:hashPw(p)});setAccounts(list);$('newName').value='';$('newPw').value='';renderEmployees();toast(n+' 추가됨');
+  if(getAccounts().some(function(a){return a.id===n;})){toast('이미 있는 직원이에요');return;}
+  addEmployee(n,hashPw(p));$('newName').value='';$('newPw').value='';toast(n+' 추가됨');
 }
 function delEmp(id){
   if(getAccounts().length<=1){toast('직원이 최소 1명은 있어야 해요');return;}
   if(!confirm(id+' 직원을 삭제할까요?'))return;
-  setAccounts(getAccounts().filter(function(a){return a.id!==id;}));renderEmployees();toast('삭제됨');
+  deleteEmployee(id);toast('삭제됨');
 }
 
 /* ---------- 엑셀 (급여 포함, 엑셀에서만 계산) ---------- */
@@ -610,7 +633,7 @@ $('xExcel').addEventListener('click',downloadExcel);
 $('addEmp').addEventListener('click',addEmp);
 
 /* ---------- 시작 ---------- */
-seed();
+startSync();
 if(localStorage.getItem(K.sess))showApp();else showLogin();
 })();
 </script>
