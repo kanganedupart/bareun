@@ -444,7 +444,8 @@ function askConfirm(){
 }
 function confirmSave(){
   addRecord({date:todayISO(),name:$('fName').value.trim(),rrn:fmtRrn($('fRrn').value),type:curType,hours:stdHours(curType),memo:''});
-  $('confirmModal').classList.remove('show');resetInput();toast('등록되었습니다!');$('fName').focus();
+  $('confirmModal').classList.remove('show');resetInput();toast('등록되었습니다!');
+  if(document.activeElement&&document.activeElement.blur)document.activeElement.blur();
 }
 
 /* ---------- 확인(검색) ---------- */
@@ -598,7 +599,9 @@ $('tabCheck').addEventListener('click',function(){switchTab('check');});
 $('tabAdmin').addEventListener('click',function(){switchTab('admin');});
 
 document.querySelectorAll('#inputView .pick').forEach(function(p){p.addEventListener('click',function(){setType(p.getAttribute('data-type'));});});
+$('fName').addEventListener('focus',function(){this.value='';this.classList.remove('bad');$('fNameErr').classList.remove('show');});
 $('fName').addEventListener('input',function(){this.value=this.value.replace(/[A-Za-z0-9]/g,'');this.classList.remove('bad');$('fNameErr').classList.remove('show');});
+$('fRrn').addEventListener('focus',function(){this.value='';this.classList.remove('bad');$('fRrnErr').classList.remove('show');});
 $('fRrn').addEventListener('input',function(){this.value=fmtRrn(this.value);this.classList.remove('bad');$('fRrnErr').classList.remove('show');
   if(digits(this.value).length===13){this.blur();/* 자판 닫기 */
     setTimeout(function(){var p=document.querySelector('#inputView .picks');if(p)p.scrollIntoView({behavior:'smooth',block:'center'});},150);
