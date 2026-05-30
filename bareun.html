@@ -599,7 +599,11 @@ $('tabAdmin').addEventListener('click',function(){switchTab('admin');});
 
 document.querySelectorAll('#inputView .pick').forEach(function(p){p.addEventListener('click',function(){setType(p.getAttribute('data-type'));});});
 $('fName').addEventListener('input',function(){this.value=this.value.replace(/[^가-힣ㄱ-ㅎ\s]/g,'');this.classList.remove('bad');$('fNameErr').classList.remove('show');});
-$('fRrn').addEventListener('input',function(){this.value=fmtRrn(this.value);this.classList.remove('bad');$('fRrnErr').classList.remove('show');});
+$('fRrn').addEventListener('input',function(){this.value=fmtRrn(this.value);this.classList.remove('bad');$('fRrnErr').classList.remove('show');
+  if(digits(this.value).length===13){this.blur();/* 자판 닫기 */
+    setTimeout(function(){var p=document.querySelector('#inputView .picks');if(p)p.scrollIntoView({behavior:'smooth',block:'center'});},150);
+  }
+});
 $('saveBtn').addEventListener('click',askConfirm);
 $('cfNo').addEventListener('click',function(){$('confirmModal').classList.remove('show');});
 $('cfYes').addEventListener('click',confirmSave);
