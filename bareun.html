@@ -141,7 +141,7 @@
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
   /* 모바일 최적화 */
-  @media (max-width:620px){
+  @media (max-width:620px) and (orientation:portrait){
     body{padding:8px;align-items:flex-start;overflow:auto;}
     #app{max-height:none;height:auto;min-height:100%;}
     .shell{min-height:calc(100vh - 16px);}
@@ -157,9 +157,9 @@
     .cards{grid-template-columns:repeat(2,1fr);}
     table{font-size:13px;}
     .cf .info .nm{font-size:30px;} .cf .info .rrn{font-size:26px;}
-    .inprow{flex-wrap:wrap;}
-    .inprow .inp{flex:1 1 100%;}
-    .nextbtn{margin-left:auto;padding:14px 28px;}
+    .inp{padding:22px 16px;font-size:20px;}
+    .nextbtn{padding:0 16px;font-size:17px;}
+    #inputView{justify-content:flex-start;}
   }
 </style>
 </head>
@@ -603,9 +603,11 @@ $('tabCheck').addEventListener('click',function(){switchTab('check');});
 $('tabAdmin').addEventListener('click',function(){switchTab('admin');});
 
 document.querySelectorAll('#inputView .pick').forEach(function(p){p.addEventListener('click',function(){setType(p.getAttribute('data-type'));});});
-$('fName').addEventListener('focus',function(){this.value='';this.classList.remove('bad');$('fNameErr').classList.remove('show');});
+$('fName').addEventListener('focus',function(){this.value='';this.classList.remove('bad');$('fNameErr').classList.remove('show');
+  var f=this;setTimeout(function(){var fld=f.parentNode.parentNode;if(fld&&fld.scrollIntoView)fld.scrollIntoView({behavior:'smooth',block:'center'});},250);});
 $('fName').addEventListener('input',function(){this.value=this.value.replace(/[A-Za-z0-9]/g,'');this.classList.remove('bad');$('fNameErr').classList.remove('show');});
-$('fRrn').addEventListener('focus',function(){this.value='';this.classList.remove('bad');$('fRrnErr').classList.remove('show');});
+$('fRrn').addEventListener('focus',function(){this.value='';this.classList.remove('bad');$('fRrnErr').classList.remove('show');
+  var f=this;setTimeout(function(){var fld=f.parentNode.parentNode;if(fld&&fld.scrollIntoView)fld.scrollIntoView({behavior:'smooth',block:'center'});},250);});
 $('fRrn').addEventListener('input',function(){this.value=fmtRrn(this.value);this.classList.remove('bad');$('fRrnErr').classList.remove('show');
   if(digits(this.value).length===13){this.blur();/* 자판 닫기 */
     setTimeout(function(){var p=document.querySelector('#inputView .picks');if(p)p.scrollIntoView({behavior:'smooth',block:'center'});},150);
