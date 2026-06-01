@@ -4,7 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#3E3D39">
+<link rel="manifest" href='data:application/manifest+json,{"name":"근무 관리","short_name":"근무","start_url":".","display":"standalone","background_color":"#3E3D39","theme_color":"#3E3D39"}'>
 <title>근무 관리</title>
 <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
 <style>
@@ -45,7 +48,7 @@
   .panel.sel{display:flex;}
 
   /* 입력 */
-  .date-line{text-align:center;font-size:14px;color:var(--muted);font-weight:600;margin-bottom:16px;}
+  .date-line{text-align:center;font-size:21px;color:var(--muted);font-weight:600;margin-bottom:16px;}
   .date-line b{color:var(--ink);}
   .field{margin-bottom:18px;}
   .field>label{display:block;font-size:17px;font-weight:700;margin-bottom:9px;}
@@ -168,12 +171,12 @@
     .cards{grid-template-columns:repeat(2,1fr);}
     table{font-size:13px;}
     .cf .info .nm{font-size:30px;} .cf .info .rrn{font-size:26px;}
-    .inp{padding:34px 18px;font-size:21px;}
+    .inp{padding:28px 18px;font-size:21px;}
     .nextbtn{padding:0 18px;font-size:18px;}
-    .field{margin-bottom:24px;}
-    .picks{margin-bottom:22px;}
-    .pick{padding:24px;}
-    #inputView{justify-content:center;}
+    .field{margin-bottom:20px;}
+    .picks{margin-bottom:18px;}
+    .pick{padding:20px;}
+    #inputView{justify-content:flex-start;padding-top:10px;}
   }
 </style>
 </head>
