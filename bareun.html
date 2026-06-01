@@ -228,10 +228,10 @@
       <div class="field">
         <label>연락처</label>
         <div class="inprow">
-          <input id="fTel" class="inp" type="text" inputmode="numeric" autocomplete="off" maxlength="13" placeholder="010-0000-0000">
+          <input id="fTel" class="inp" type="text" inputmode="numeric" autocomplete="off" maxlength="13" placeholder="010-0000-0000 (뒤 8자리만)">
           <button id="nextTel" class="nextbtn" type="button">다음 ›</button>
         </div>
-        <div class="err" id="fTelErr">연락처 11자리를 정확히 입력해 주세요</div>
+        <div class="err" id="fTelErr">연락처 뒤 8자리를 정확히 입력해 주세요</div>
       </div>
       <div class="field" style="margin-bottom:10px;"><label>근무 시간</label></div>
       <div class="picks">
@@ -638,9 +638,9 @@ $('fName').addEventListener('input',function(){this.value=this.value.replace(/[A
 $('fRrn').addEventListener('focus',function(){this.value='';this.classList.remove('bad');$('fRrnErr').classList.remove('show');
   var f=this;setTimeout(function(){var fld=f.parentNode.parentNode;if(fld&&fld.scrollIntoView)fld.scrollIntoView({behavior:'smooth',block:'center'});},250);});
 $('fRrn').addEventListener('input',function(){this.value=fmtRrn(this.value);this.classList.remove('bad');$('fRrnErr').classList.remove('show');});
-$('fTel').addEventListener('focus',function(){this.value='';this.classList.remove('bad');$('fTelErr').classList.remove('show');
+$('fTel').addEventListener('focus',function(){this.value='010-';this.classList.remove('bad');$('fTelErr').classList.remove('show');
   var f=this;setTimeout(function(){var fld=f.parentNode.parentNode;if(fld&&fld.scrollIntoView)fld.scrollIntoView({behavior:'smooth',block:'center'});},250);});
-$('fTel').addEventListener('input',function(){this.value=fmtTel(this.value);this.classList.remove('bad');$('fTelErr').classList.remove('show');
+$('fTel').addEventListener('input',function(){var rest=digits(this.value).replace(/^010/,'').slice(0,8);this.value=fmtTel('010'+rest);this.classList.remove('bad');$('fTelErr').classList.remove('show');
   if(digits(this.value).length===11){this.blur();
     setTimeout(function(){var p=document.querySelector('#inputView .picks');if(p)p.scrollIntoView({behavior:'smooth',block:'center'});},150);
   }
@@ -675,7 +675,7 @@ $('eHalf').addEventListener('click',function(){setEdType('half');setEdHours(5);}
 $('eMinus').addEventListener('click',function(){setEdHours(edHours-0.5);});
 $('ePlus').addEventListener('click',function(){setEdHours(edHours+0.5);});
 $('eRrn').addEventListener('input',function(){this.value=fmtRrn(this.value);});
-$('eTel').addEventListener('input',function(){this.value=fmtTel(this.value);});
+$('eTel').addEventListener('input',function(){var rest=digits(this.value).replace(/^010/,'').slice(0,8);this.value=fmtTel('010'+rest);});
 $('eMemo').addEventListener('input',function(){$('eMemoErr').classList.remove('show');});
 $('eSave').addEventListener('click',saveEdit);
 $('eDelete').addEventListener('click',deleteRec);
