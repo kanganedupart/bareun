@@ -141,6 +141,17 @@
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
   /* 모바일 최적화 */
+  @media (max-height:600px){
+    body{align-items:flex-start;overflow:auto;}
+    #app{max-height:none;height:auto;min-height:calc(100vh - 28px);}
+    .panel{overflow:visible;}
+    #inputView{justify-content:flex-start;}
+    .inp{padding:18px 18px;font-size:19px;}
+    .field{margin-bottom:12px;}
+    .picks{margin-bottom:12px;}
+    .pick{padding:14px;}
+    .submit{padding:16px;font-size:21px;}
+  }
   @media (max-width:620px) and (orientation:portrait){
     body{padding:8px;align-items:flex-start;overflow:auto;}
     #app{max-height:none;height:auto;min-height:100%;}
@@ -157,9 +168,12 @@
     .cards{grid-template-columns:repeat(2,1fr);}
     table{font-size:13px;}
     .cf .info .nm{font-size:30px;} .cf .info .rrn{font-size:26px;}
-    .inp{padding:22px 16px;font-size:20px;}
-    .nextbtn{padding:0 16px;font-size:17px;}
-    #inputView{justify-content:flex-start;}
+    .inp{padding:34px 18px;font-size:21px;}
+    .nextbtn{padding:0 18px;font-size:18px;}
+    .field{margin-bottom:24px;}
+    .picks{margin-bottom:22px;}
+    .pick{padding:24px;}
+    #inputView{justify-content:center;}
   }
 </style>
 </head>
